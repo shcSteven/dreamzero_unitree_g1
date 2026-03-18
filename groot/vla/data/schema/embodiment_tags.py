@@ -346,3 +346,8 @@ class EmbodimentTag(Enum):
     """
     The Mecka robot with hands.
     """
+
+    UNITREE_G1_UPPER = "unitree_g1_upper"
+    """
+    The Unitree G1 upper body with Dex3 hands (bimanual arms + dexterous fingers).
+    """

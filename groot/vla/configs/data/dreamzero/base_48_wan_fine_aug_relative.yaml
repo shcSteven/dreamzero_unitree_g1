@@ -342,6 +342,88 @@ transform_yam:
     - ${model_specific_transform}
 
 ################################################################################
+# unitree_g1_upper (Unitree G1 Dex3: bimanual arms + dexterous hands,
+#                   state 28 dims, action 28 dims, 3 views)
+################################################################################
+
+modality_config_unitree_g1_upper:
+  video:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    eval_delta_indices: [0]
+    modality_keys:
+      - video.cam_room
+      - video.cam_left_wrist
+      - video.cam_right_wrist
+  state:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - state.left_arm
+      - state.right_arm
+      - state.left_hand
+      - state.right_hand
+  action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    modality_keys:
+      - action.left_arm
+      - action.right_arm
+      - action.left_hand
+      - action.right_hand
+  language:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - annotation.task
+
+transform_unitree_g1_upper:
+  _target_: groot.vla.data.transform.ComposedModalityTransform
+  transforms:
+    # Video transforms
+    - <<: *totensor_cfg
+      apply_to: ${modality_config_unitree_g1_upper.video.modality_keys}
+    - <<: *crop_cfg
+      apply_to: ${modality_config_unitree_g1_upper.video.modality_keys}
+    - <<: *resize_cfg
+      apply_to: ${modality_config_unitree_g1_upper.video.modality_keys}
+    - <<: *color_jitter_cfg
+      apply_to: ${modality_config_unitree_g1_upper.video.modality_keys}
+    - <<: *to_numpy_cfg
+      apply_to: ${modality_config_unitree_g1_upper.video.modality_keys}
+
+    # State transforms
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_unitree_g1_upper.state.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_unitree_g1_upper.state.modality_keys}
+      normalization_modes:
+        state.left_arm: q99
+        state.right_arm: q99
+        state.left_hand: q99
+        state.right_hand: q99
+
+    # Action transforms
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_unitree_g1_upper.action.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_unitree_g1_upper.action.modality_keys}
+      normalization_modes:
+        action.left_arm: q99
+        action.right_arm: q99
+        action.left_hand: q99
+        action.right_hand: q99
+
+    # ConcatTransform
+    - _target_: groot.vla.data.transform.ConcatTransform
+      video_concat_order: ${modality_config_unitree_g1_upper.video.modality_keys}
+      state_concat_order: ${modality_config_unitree_g1_upper.state.modality_keys}
+      action_concat_order: ${modality_config_unitree_g1_upper.action.modality_keys}
+
+    # Model-specific transform
+    - ${model_specific_transform}
+
+################################################################################
 # Modality Configs
 ################################################################################
 
@@ -349,6 +431,7 @@ modality_configs:
   oxe_droid: ${modality_config_oxe_droid}
   agibot: ${modality_config_agibot}
   yam: ${modality_config_yam}
+  unitree_g1_upper: ${modality_config_unitree_g1_upper}
 
 ################################################################################
 # Transforms
@@ -358,6 +441,7 @@ transforms:
   oxe_droid: ${transform_oxe_droid}
   agibot: ${transform_agibot}
   yam: ${transform_yam}
+  unitree_g1_upper: ${transform_unitree_g1_upper}
 
 ################################################################################
 # Metadata Versions
@@ -367,6 +451,7 @@ metadata_versions:
   oxe_droid: '0221'
   agibot: '0221'
   yam: '0221'
+  unitree_g1_upper: '0221'
 
 ################################################################################
 # FPS (per embodiment, null means use dataset default)
@@ -374,3 +459,4 @@ metadata_versions:
 
 fps:
   yam: 30
+  unitree_g1_upper: 30
