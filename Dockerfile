@@ -38,8 +38,9 @@ RUN pip install --no-cache-dir \
     torchaudio==2.8.0 \
     --index-url https://download.pytorch.org/whl/cu129
 
+ENV TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0;9.0a;10.0;10.0a"
 RUN pip install --no-cache-dir psutil ninja packaging && \
-    pip install --no-cache-dir --no-build-isolation flash_attn==2.8.3
+    MAX_JOBS=8 pip install --no-cache-dir --no-build-isolation -v flash_attn==2.8.3
 
 COPY docker/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --ignore-installed -r /tmp/requirements.txt && \
@@ -48,4 +49,7 @@ RUN pip install --no-cache-dir --ignore-installed -r /tmp/requirements.txt && \
 WORKDIR /workspace
 ENV HYDRA_FULL_ERROR=1
 
-ENTRYPOINT ["/bin/bash"]
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]
