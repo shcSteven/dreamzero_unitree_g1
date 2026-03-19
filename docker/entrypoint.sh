@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-# Verify flash_attn is compatible with this PyTorch; rebuild if not
-python -c "import flash_attn" 2>/dev/null || {
-    echo "[entrypoint] flash_attn ABI mismatch detected, rebuilding (~10 min)..."
-    MAX_JOBS=8 pip install --no-build-isolation flash-attn --force-reinstall --no-cache-dir -q
-}
+echo "[entrypoint] Installing flash_attn (compiling for this GPU arch, ~5-10 min)..."
+TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-8.0;8.6;8.9;9.0;9.0a;10.0;10.0a}" \
+MAX_JOBS="${MAX_JOBS:-8}" \
+pip install --no-build-isolation flash-attn --no-cache-dir -q 2>&1 | tail -5
+echo "[entrypoint] flash_attn ready."
 
 # Install the mounted codebase in editable mode if present
 if [ -f /workspace/pyproject.toml ]; then
