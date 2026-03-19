@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.git/
+.gitignore
+checkpoints/
+wandb/
+outputs/
+*.ckpt
+*.pt
+*.bin
+*.safetensors
+debug_image/
+*.log
+.cursor/
