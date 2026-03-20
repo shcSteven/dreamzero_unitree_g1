@@ -6,6 +6,7 @@
 #SBATCH --exclude=pool0-01626
 #SBATCH --exclude=pool0-01307
 #SBATCH --exclude=pool0-01574
+#SBATCH --exclude=pool0-01007
 #SBATCH --nodes=16
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=8
@@ -120,7 +121,7 @@ EXIT_CODE=$?
 # ============================================
 # Auto-resubmit if timeout (exit code 124) and runs remaining
 # ============================================
-if [[ $EXIT_CODE == 124 ]] && [[ $RUN_COUNT -lt $MAX_RUNS ]]; then
+if [[ $EXIT_CODE != 0 ]] && [[ $RUN_COUNT -lt $MAX_RUNS ]]; then
     if [[ -d "${HOST_OUTPUT_DIR}" ]]; then
         INCOMPLETE_DIR="${HOST_OUTPUT_DIR}/_incomplete_checkpoints"
         mkdir -p "${INCOMPLETE_DIR}"
@@ -136,7 +137,7 @@ if [[ $EXIT_CODE == 124 ]] && [[ $RUN_COUNT -lt $MAX_RUNS ]]; then
     fi
 
     NEXT_RUN=$((RUN_COUNT + 1))
-    echo "=== Timeout reached. Resubmitting as run ${NEXT_RUN}/${MAX_RUNS} ==="
+    echo "=== Exited with code ${EXIT_CODE}. Resubmitting as run ${NEXT_RUN}/${MAX_RUNS} ==="
     sbatch --export=ALL,RUN_COUNT=${NEXT_RUN} "$0"
 elif [[ $EXIT_CODE == 0 ]]; then
     echo "=== Training completed successfully ==="
