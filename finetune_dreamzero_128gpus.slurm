@@ -53,8 +53,11 @@ timeout 3.9h srun --container-image="${CONTAINER_IMAGE}" \
     --export=ALL,HF_HOME=/root/.cache/huggingface,TRITON_CACHE_DIR=/tmp/triton,PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,HYDRA_FULL_ERROR=1,PYTHONPATH=/workspace \
     bash -c '
 
+pip install -e /workspace --quiet --no-deps 2>/dev/null || true
+
+python3 -c "import torch; import flash_attn; print(f\"torch {torch.__version__} flash_attn {flash_attn.__version__} OK\")"
+
 GPUS_PER_NODE="${SLURM_GPUS_ON_NODE:-8}"
-NUM_GPUS_TOTAL="$((SLURM_NNODES * GPUS_PER_NODE))"
 NODE_RANK="${SLURM_PROCID:-0}"
 
 torchrun \

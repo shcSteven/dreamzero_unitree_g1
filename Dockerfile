@@ -40,15 +40,21 @@ RUN pip install --no-cache-dir \
 
 RUN pip install --no-cache-dir psutil ninja packaging
 
+RUN rm -rf /usr/lib/python3/dist-packages/blinker*
+
 COPY docker/requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --ignore-installed -r /tmp/requirements.txt && \
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
-RUN pip install --no-cache-dir \
-    torch==2.8.0 \
-    torchvision==0.23.0 \
-    torchaudio==2.8.0 \
-    --index-url https://download.pytorch.org/whl/cu129 --force-reinstall --no-deps
+RUN python -c "import torch; print(f'PRE-FLASH CHECK: torch {torch.__version__} CUDA {torch.version.cuda}')"
+
+ENV TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0;9.0a;10.0;10.0a"
+RUN MAX_JOBS=8 pip install --no-cache-dir --no-build-isolation flash_attn==2.8.3
+
+RUN python -c "\
+import torch; print(f'torch {torch.__version__} CUDA {torch.version.cuda}'); \
+import flash_attn; print(f'flash_attn {flash_attn.__version__}'); \
+print('ALL IMPORTS OK')"
 
 WORKDIR /workspace
 ENV HYDRA_FULL_ERROR=1
