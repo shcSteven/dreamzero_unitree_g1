@@ -53,6 +53,8 @@ timeout 3.9h srun --container-image="${CONTAINER_IMAGE}" \
     --export=ALL,HF_HOME=/root/.cache/huggingface,TRITON_CACHE_DIR=/tmp/triton,PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,HYDRA_FULL_ERROR=1,PYTHONPATH=/workspace \
     bash -c '
 
+mkdir -p /tmp/triton
+
 pip install -e /workspace --quiet --no-deps 2>/dev/null || true
 
 python3 -c "import torch; import flash_attn; print(f\"torch {torch.__version__} flash_attn {flash_attn.__version__} OK\")"
@@ -94,7 +96,7 @@ torchrun \
     bf16=true \
     tf32=true \
     eval_bf16=true \
-    dataloader_pin_memory=false \
+    dataloader_pin_memory=true \
     dataloader_num_workers=4 \
     image_resolution_width=320 \
     image_resolution_height=240 \
