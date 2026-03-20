@@ -70,7 +70,6 @@ torchrun \
     report_to=wandb \
     data=dreamzero/unitree_g1_upper_relative \
     wandb_project=dreamzero \
-    run_name="${RUN_NAME}" \
     train_architecture=lora \
     num_frames=33 \
     action_horizon=24 \
